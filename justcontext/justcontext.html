@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>justContext.js Example</title>
+    <link href="https://www.cssscript.com/wp-includes/css/sticky.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+    <link href="justcontext.css" rel="stylesheet" type="text/css">
+    <style>
+        body {
+            font-family: 'Roboto';
+        }
+        .context_menu {
+            margin: 30px auto;
+            width: 450px;
+            height: 320px;
+            background-color: #eee;
+            text-align: center;
+            line-height: 320px;
+        }
+    </style>
+</head>
+
+<body>
+<h1>justContext.js Example</h1>
+<div class="jctx-host jctx-id-1 context_menu">Right-click me</div>
+<ul class="jctx jctx-id-1 jctx-black jctx-black-shadow">
+    <li data-action="back"><i class="fa fa-backward"></i> Back</li>
+    <li data-action="forawrd"><i class="fa fa-forward"></i> Forward</li>
+    <li data-action="refresh"><i class="fa fa-refresh"></i> Refresh</li>
+    <hr>
+    <li data-action="save"><i class="fa fa-file"></i> Save As</li>
+    <li data-action="print"><i class="fa fa-print"></i> Print</li>
+    <li data-action="disable" class="disabled"><i class="fa fa-power-off"></i> Disabled Item</li>
+</ul>
+<script src="justcontext.js"></script>
+<script>
+    function handleMenuAction(evt) {
+        const eventinfo = evt.split('.');
+        //elementid, function
+        switch(evt[1]){
+        }
+    }
+</script>
+</body>
+</html>

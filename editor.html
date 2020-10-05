@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editor</title>
+    <link href="https://www.cssscript.com/wp-includes/css/sticky.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+    <link href="justcontext/justcontext.css" rel="stylesheet" type="text/css">
+    <script src="justcontext/justcontext.js" id="justcontext-script"></script>
+    <style>
+        body {
+            font-family: 'Roboto';
+        }
+
+        .context_menu {
+            margin: 30px auto;
+            width: 450px;
+            height: 320px;
+            background-color: #eee;
+            text-align: center;
+            line-height: 320px;
+        }
+
+        .draggable {
+            position: absolute;
+            z-index: 9;
+            background-color: #f1f1f1;
+            text-align: center;
+            border: 1px solid #d3d3d3;
+        }
+
+        .draggableheader {
+            padding: 10px;
+            cursor: move;
+            z-index: 10;
+            background-color: #2196F3;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<ul class="jctx jctx-id-item jctx-black jctx-black-shadow" id="base-context-menu" example>
+    <li data-action="duplicate" example><i class="fa fa-clone"></i> Duplicate</li>
+    <li data-action="delete" example><i class="fa fa-trash-o"></i> Delete</li>
+    <hr>
+    <li data-action="save" example><i class="fa fa-file"></i> Save As</li>
+    <li data-action="print" example><i class="fa fa-print"></i> Print</li>
+    <li data-action="disable" class="disabled" example><i class="fa fa-power-off"></i> Disabled Item</li>
+</ul>
+<ul class="jctx jctx-id-sub jctx-black jctx-black-shadow" id="sub-context-menu" example>
+    <li data-action="link" example><i class="fa fa-sign-in"></i> Link</li>
+    <hr>
+    <li data-action="save" example><i class="fa fa-file"></i> Save As</li>
+    <li data-action="print" example><i class="fa fa-print"></i> Print</li>
+    <li data-action="disable" class="disabled" example><i class="fa fa-power-off"></i> Disabled Item</li>
+</ul>
+<button type="button" id="savebutton">Save</button>
+<button type="button" id="newbutton" onclick="createDraggable()">New</button>
+<p>Click and hold the mouse button down while moving the DIV element</p>
+
+<div id="exampledraggable" class="draggable" hidden example>
+    <div id="exampledraggableheader" class="jctx-host jctx-id-item draggableheader" example>Click here to move</div>
+    <p contenteditable="true" class="jctx-host jctx-id-sub" example>Move</p>
+    <p contenteditable="true" class="jctx-host jctx-id-sub" example>this</p>
+    <p contenteditable="true" class="jctx-host jctx-id-sub" example>DIV</p>
+</div>
+<script>
+    //Make the DIV element draggagle:
+    ids = 0;
+    example = document.getElementById("exampledraggable");
+    dragElement(example);
+
+    function dragElement(elmnt) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (document.getElementById(elmnt.id + "header")) {
+            /* if present, the header is where you move the DIV from:*/
+            document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+        } else {
+            /* otherwise, move the DIV from anywhere inside the DIV:*/
+            elmnt.onmousedown = dragMouseDown;
+        }
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            /* stop moving when mouse button is released:*/
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    function createDraggable() {
+        const newdraggable = example.cloneNode(true);
+        let draggable_id = "draggable-" + ids;
+        newdraggable.id = draggable_id;
+        newdraggable.removeAttribute("example");
+        createContextMenu(ids);
+        let count = 0;
+        Array.from(newdraggable.childNodes).forEach(function(child){
+            console.debug(child)
+            if(!child.type === Node.ELEMENT_NODE){
+                child.removeAttribute("example");
+            }
+            if(child.tagName === "P"){
+                createContextMenu(ids, true, count)
+                child.className = "jctx-host jctx-id-" + ids + "_" + count
+                count++;
+            }else{
+                child.id = draggable_id + "header";
+                child.className = "jctx-host jctx-id-" + ids + " draggableheader";
+            }
+        })
+        document.body.appendChild(newdraggable);
+        document.getElementById(draggable_id).removeAttribute("hidden")
+        dragElement(document.getElementById(draggable_id));
+        reload_context_menus()
+        ids++;
+        return draggable_id;
+    }
+
+    function createContextMenu(id, sub, subID) {
+        let newmenu;
+        if(sub){
+            newmenu = document.getElementById("sub-context-menu").cloneNode(true);
+            newmenu.id = "context-" + id + "_" + subID;
+            newmenu.className = "jctx jctx-id-" + id +  "_" + subID + " jctx-black jctx-black-shadow";
+        }else {
+            newmenu = document.getElementById("base-context-menu").cloneNode(true);
+            newmenu.id = "context-" + id;
+            newmenu.className = "jctx jctx-id-" + id+ " jctx-black jctx-black-shadow";
+        }
+        newmenu.removeAttribute("example");
+        document.body.appendChild(newmenu);
+        let elements = document.getElementById(newmenu.id).getElementsByTagName("li")
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].setAttribute("data-action", newmenu.id + "_" + elements[i].getAttribute("data-action"));
+            elements[i].removeAttribute("example");
+        }
+    }
+
+    function reload_context_menus(){
+        /*very wasteful. reloads ctxt for ALL elements every time a new one is called. Try to change the og file to make dditions quicker.*/
+        document.getElementById("justcontext-script").remove()
+        const script = document.createElement("script");
+        script.src = "justcontext/justcontext.js";
+        script.id = "justcontext-script"
+        document.head.appendChild(script)
+    }
+
+    function handleMenuAction(evt) {
+        alert("Action required: " + evt);
+    }
+</script>
+
+</body>
+</html>
